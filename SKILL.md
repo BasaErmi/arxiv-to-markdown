@@ -73,7 +73,6 @@ Ask user preference if unclear. Default to Obsidian wikilink format.
 
 Determine save location based on context:
 - If user specifies a path, use it
-- If in an Obsidian vault with a research folder (e.g. `30_研究/`), save there
 - Otherwise save to current working directory
 
 **File naming**: `<Paper Title>.md` (clean special characters: replace `/`, `:`, `?`, `"`, `<`, `>`, `|` with `-`)

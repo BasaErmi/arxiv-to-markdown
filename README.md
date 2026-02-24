@@ -13,7 +13,7 @@ When you give Claude Code an arxiv paper URL, this skill automatically:
 
 ### Before & After
 
-**Input:** `https://arxiv.org/html/2503.02247v5`
+**Input:** `https://arxiv.org/html/XXXX.XXXXX`
 
 **Output:** A complete Markdown file with:
 - Metadata header (source URL, arxiv ID, project page)
@@ -51,15 +51,15 @@ cp -r arxiv-to-markdown ~/.claude/skills/
 Once installed, the skill triggers automatically when you mention an arxiv URL in Claude Code:
 
 ```
-> Save this paper as markdown: https://arxiv.org/html/2503.02247v5
+> Save this paper as markdown: https://arxiv.org/html/XXXX.XXXXX
 ```
 
 ```
-> Download this arxiv paper: https://arxiv.org/abs/2401.12345
+> Download this arxiv paper: https://arxiv.org/html/XXXX.XXXXX
 ```
 
 ```
-> Extract this paper to markdown with images: https://arxiv.org/pdf/2312.67890
+> Extract this paper to markdown with images: https://arxiv.org/html/XXXX.XXXXX
 ```
 
 The skill accepts `arxiv.org/html/`, `arxiv.org/abs/`, and `arxiv.org/pdf/` URLs — it automatically converts them to the HTML version for extraction.
@@ -76,7 +76,7 @@ python3 scripts/arxiv_extract.py <arxiv_html_url> <output_dir> [--images-dir <di
 
 ```bash
 python3 scripts/arxiv_extract.py \
-  "https://arxiv.org/html/2503.02247v5" \
+  "https://arxiv.org/html/XXXX.XXXXX" \
   ./output \
   --images-dir ./output/assets
 ```

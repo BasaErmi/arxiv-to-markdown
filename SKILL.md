@@ -46,38 +46,120 @@ This produces:
 
 Read `raw_content.txt` and `images_map.json`, then write a well-formatted Markdown file.
 
-**Formatting rules:**
-- **Frontmatter block**: Source URL, arxiv ID, project page (if any)
-- **Headings**: Map section numbers to markdown levels (`I.` → `##`, `I-A` → `###`, `I-A1` → `####`)
-- **Bold** key terms, method names, and contributions on first mention
-- **Equations**: Wrap in `$$..$$` with LaTeX notation; reconstruct variable names from context
-- **Tables**: Convert to proper markdown tables with `|` separators and alignment
-- **Lists**: Use `-` for bullet points, numbered lists where appropriate
-- **References**: Numbered list, include venue/year when present in the text
-- **Images**: Insert at the relevant section using the caption from `images_map.json`
+---
 
-**Image embedding format** (adapt to user's environment):
-- Obsidian: `> ![[assets/<subfolder>/<filename>]]`
-- Standard Markdown: `> ![Figure N caption](assets/<subfolder>/<filename>)`
+#### CRITICAL — Content fidelity
 
-Ask user preference if unclear. Default to Obsidian wikilink format.
+The goal is to produce a Markdown file that reads like the original PDF paper. Follow these rules strictly:
 
-**Image placement**: Insert each figure immediately after the paragraph that first references it (e.g., "as shown in Figure 3"). Use a blockquote with the caption:
+- **Keep all original English text verbatim.** Do NOT translate, summarize, paraphrase, or interpret. Every sentence from the paper must appear in the output.
+- **Do NOT add your own content**: no commentary, no analysis sections, no bullet-point summaries, no interpretive headings (e.g., "关键发现", "核心创新", "性能分析").
+- **Do NOT reorganize.** Preserve the original section ordering and titles exactly as they appear in the paper.
+- **Do NOT convert prose to bullet points.** If the original is a paragraph, keep it as a paragraph. Only use bullet points where the paper itself uses a list.
+
+---
+
+#### File structure & metadata
+
+**No YAML frontmatter.** Use this exact structure:
+
+```markdown
+# Paper Title (from first line of raw text)
+
+> **来源**: arXiv:<paper_id>
+> **链接**: https://arxiv.org/html/<paper_id>
+> **项目主页**: <url if found in paper, otherwise omit this line>
+
+## Abstract
+
+<abstract text>
+
+---
+
+## I. Introduction
+
+<content>
+
+---
+
+## II. Related Work
+
+...
+```
+
+---
+
+#### Section headings
+
+Map the paper's section numbering to markdown heading levels. Keep original English titles exactly:
+
+| Paper format | Markdown | Example |
+|---|---|---|
+| Top-level (`I.`, `II.`) | `##` | `## I. Introduction` |
+| Sub-section (`II-A`, `III-B`) | `###` | `### II-A. Zero-shot ObjectNav` |
+| Sub-sub-section (`III-C1`) | `####` | `#### III-C1. VLM-based State Prediction` |
+| Named subsection (no number) | `###` or `####` | `### Contributions` |
+| `Abstract` | `##` | `## Abstract` |
+| `References` | `##` | `## References` |
+| `Acknowledgment` | `##` | `## Acknowledgment` |
+
+**Section separators**: Use `---` only between major top-level sections (after Abstract, after each Roman-numeral section, before References). Do NOT put `---` between subsections.
+
+---
+
+#### Text formatting
+
+- **Bold** key terms, method names, model names, and contributions on first mention only (e.g., **WMNav**, **Curiosity Value Map**, **BLIP-2**)
+- **Inline math variables**: Use `*italics*` for simple variable names (e.g., *I_pano*, *S_final*, *a = (θ, d)*). Use `$...$` for expressions with operators/subscripts that need LaTeX rendering.
+- **Equations**: Display equations use `$$...$$`. Preserve equation numbers from the paper:
+  ```markdown
+  $$S_t = \text{PredictVLM}(I_{pano,t}) \quad (1)$$
+  ```
+- **Tables**: Place a bold title line before each table:
+  ```markdown
+  **Table I: Comparison with state-of-the-art methods on HM3D and MP3D**
+  
+  | Model | SR(%) | SPL(%) |
+  |---|---|---|
+  | ... | ... | ... |
+  ```
+- **References**: Numbered list format:
+  ```markdown
+  1. D. Batra et al., "Objectnav revisited: On evaluation of embodied agents navigating to objects," arXiv:2006.13171, 2020.
+  2. A. Majumdar et al., "ZSON: Zero-shot object-goal navigation using multimodal goal embeddings," NeurIPS 2022.
+  ```
+
+---
+
+#### Image embedding
+
+Format (Obsidian wikilinks):
 
 ```markdown
 > **Figure N**: Caption text from images_map.json
-> ![[assets/subfolder/filename.png]]
+> ![[assets/<slug>/<filename>]]
 ```
+
+**Placement**: Insert each figure immediately after the paragraph that first references it (e.g., "as shown in Figure 3" or "depicted in Fig. 2").
+
+**Image slug**: Use the paper's short acronym/name in lowercase (e.g., `wmnav`, `vlfm`, `esc`). If no clear acronym, use a short dash-separated slug from the title.
+
+---
 
 ### Step 4: Save output
 
-Determine save location based on context:
-- If user specifies a path, use it
-- Otherwise save to current working directory
+**File location** (in order of priority):
+1. User-specified path
+2. `30_研究/` folder in the current Obsidian vault
+3. Current working directory
 
-**File naming**: `<Paper Title>.md` (clean special characters: replace `/`, `:`, `?`, `"`, `<`, `>`, `|` with `-`)
+**File naming**: `<Paper Title>.md`
+- Replace `:` with ` -` (e.g., `WMNav: Integrating...` → `WMNav - Integrating...`)
+- Replace other special characters (`/`, `?`, `"`, `<`, `>`, `|`) with `-`
 
-**Image assets**: Copy from `/tmp/` to `assets/<paper-slug>/` relative to the markdown file.
+**Image assets**: Copy from `/tmp/` to `assets/<slug>/` relative to the markdown file.
+- Slug = paper acronym in lowercase (e.g., `vlfm`, `wmnav`)
+- Example: `30_研究/assets/vlfm/overview_v1.jpg`
 
 ### Step 5: Confirm output
 

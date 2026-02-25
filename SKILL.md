@@ -150,8 +150,7 @@ Format (Obsidian wikilinks):
 
 **File location** (in order of priority):
 1. User-specified path
-2. `30_研究/` folder in the current Obsidian vault
-3. Current working directory
+2. Current working directory
 
 **File naming**: `<Paper Title>.md`
 - Replace `:` with ` -` (e.g., `WMNav: Integrating...` → `WMNav - Integrating...`)
@@ -159,7 +158,7 @@ Format (Obsidian wikilinks):
 
 **Image assets**: Copy from `/tmp/` to `assets/<slug>/` relative to the markdown file.
 - Slug = paper acronym in lowercase (e.g., `vlfm`, `wmnav`)
-- Example: `30_研究/assets/vlfm/overview_v1.jpg`
+- Example: `paper/assets/vlfm/overview_v1.jpg`
 
 ### Step 5: Confirm output
 

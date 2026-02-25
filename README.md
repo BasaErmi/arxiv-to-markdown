@@ -1,6 +1,6 @@
 # arxiv-to-markdown
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that converts arxiv HTML papers into well-structured Markdown files with locally saved images.
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that converts arxiv HTML papers into faithful, well-structured Markdown reproductions with locally saved images.
 
 ## What It Does
 
@@ -8,19 +8,17 @@ When you give Claude Code an arxiv paper URL, this skill automatically:
 
 1. **Extracts** the full paper text using [trafilatura](https://github.com/adbar/trafilatura)
 2. **Downloads** all figures from the HTML page
-3. **Converts** raw text into structured Markdown with proper headings, tables, equations (LaTeX), and reference lists
+3. **Converts** raw text into structured Markdown — faithfully reproducing the original paper with proper headings, tables, equations (LaTeX), and reference lists
 4. **Embeds** images at their correct locations with figure captions
 
-### Before & After
+### Key Principle: Faithful Reproduction
 
-**Input:** `https://arxiv.org/html/XXXX.XXXXX`
+The output reads like the original PDF paper in Markdown format. The skill enforces strict content fidelity:
 
-**Output:** A complete Markdown file with:
-- Metadata header (source URL, arxiv ID, project page)
-- Hierarchical section headings (`##`, `###`, `####`)
-- LaTeX equations in `$$...$$` blocks
-- Properly formatted Markdown tables
-- Locally saved figures with captions embedded inline
+- All original English text preserved verbatim — no translation, summarization, or paraphrasing
+- Original section structure and titles kept exactly as they appear
+- Prose stays as prose — no conversion to bullet points unless the paper uses lists
+- No added commentary, analysis sections, or interpretive headings
 
 ## Installation
 
@@ -55,11 +53,11 @@ Once installed, the skill triggers automatically when you mention an arxiv URL i
 ```
 
 ```
-> Download this arxiv paper: https://arxiv.org/html/XXXX.XXXXX
+> Download this arxiv paper: https://arxiv.org/abs/XXXX.XXXXX
 ```
 
 ```
-> Extract this paper to markdown with images: https://arxiv.org/html/XXXX.XXXXX
+> Extract this paper to markdown with images: https://arxiv.org/pdf/XXXX.XXXXX
 ```
 
 The skill accepts `arxiv.org/html/`, `arxiv.org/abs/`, and `arxiv.org/pdf/` URLs — it automatically converts them to the HTML version for extraction.
@@ -76,7 +74,7 @@ python3 scripts/arxiv_extract.py <arxiv_html_url> <output_dir> [--images-dir <di
 
 ```bash
 python3 scripts/arxiv_extract.py \
-  "https://arxiv.org/html/XXXX.XXXXX" \
+  "https://arxiv.org/html/2503.02247v5" \
   ./output \
   --images-dir ./output/assets
 ```
@@ -84,51 +82,116 @@ python3 scripts/arxiv_extract.py \
 This produces:
 - `output/raw_content.txt` — extracted plain text
 - `output/images_map.json` — figure filename → caption mapping
-- `output/assets/*.png` — downloaded figure images
+- `output/assets/*` — downloaded figure images
 
 ## Output Format
 
-### Image Embedding
+### File Naming
 
-The skill supports two image formats:
-
-| Environment | Format |
-|---|---|
-| **Obsidian** (default) | `![[assets/paper-slug/figure.png]]` |
-| **Standard Markdown** | `![Figure caption](assets/paper-slug/figure.png)` |
+- **Markdown file**: `<Paper Title>.md` with `:` replaced by ` -`
+  - Example: `WMNav: Integrating...` → `WMNav - Integrating...`
+- **Image directory**: `assets/<acronym>/` using the paper's short name in lowercase
+  - Example: `assets/wmnav/`, `assets/vlfm/`
 
 ### Markdown Structure
 
 ```markdown
-# Paper Title
+# WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation
 
-> **Source**: arXiv:XXXX.XXXXX
-> **Link**: https://arxiv.org/html/XXXX.XXXXX
+> **来源**: arXiv:2503.02247v5
+> **链接**: https://arxiv.org/html/2503.02247v5
+> **项目主页**: https://example.com
 
 ## Abstract
-...
+
+Full abstract text reproduced verbatim...
+
+---
 
 ## I. Introduction
-...
-> **Figure 1**: Caption text
-> ![[assets/paper-slug/x1.png]]
+
+Full introduction paragraphs...
+
+> **Figure 1**: Caption text from the paper
+> ![[assets/wmnav/x1.png]]
+
+---
 
 ## II. Related Work
+
+### II-A. Sub-section Title
+
 ...
 
+---
+
 ## III. Method
-### III-A. Sub-section
+
+### III-A. Overview
+
 #### III-A1. Sub-sub-section
-$$equation in LaTeX$$
+
+$$S_t = \text{PredictVLM}(I_{pano,t}) \quad (1)$$
+
+---
 
 ## IV. Experiments
-| Model | Metric 1 | Metric 2 |
+
+**Table I: Comparison with state-of-the-art methods**
+
+| Model | SR(%) | SPL(%) |
 |---|---|---|
-| ...   | ...      | ...      |
+| Baseline | 42.0 | 26.0 |
+| **Ours** | **58.1** | **31.2** |
+
+---
+
+## V. Conclusion
+
+...
+
+---
 
 ## References
-1. Author et al., "Title," Venue, Year.
+
+1. D. Batra et al., "Objectnav revisited," arXiv:2006.13171, 2020.
+2. A. Majumdar et al., "ZSON," NeurIPS 2022.
 ```
+
+### Section Heading Mapping
+
+| Paper format | Markdown level | Example |
+|---|---|---|
+| Top-level (`I.`, `II.`) | `##` | `## I. Introduction` |
+| Sub-section (`II-A`, `III-B`) | `###` | `### II-A. Zero-shot ObjectNav` |
+| Sub-sub-section (`III-C1`) | `####` | `#### III-C1. VLM-based Prediction` |
+| Named subsection | `###` or `####` | `### Contributions` |
+
+### Image Embedding
+
+Default format uses Obsidian wikilinks:
+
+```markdown
+> **Figure 1**: Caption text
+> ![[assets/wmnav/x1.png]]
+```
+
+Standard Markdown is also supported:
+
+```markdown
+> **Figure 1**: Caption text
+> ![Figure 1](assets/wmnav/x1.png)
+```
+
+### Text Formatting
+
+| Element | Format | Example |
+|---|---|---|
+| Key terms (first mention) | **Bold** | **WMNav**, **BLIP-2** |
+| Simple variables | *Italics* | *I_pano*, *S_final* |
+| LaTeX expressions | `$...$` | `$\cos(\theta)$` |
+| Display equations | `$$...$$` | `$$S_t = f(x) \quad (1)$$` |
+| Section separators | `---` | Only between top-level sections |
 
 ## File Structure
 
